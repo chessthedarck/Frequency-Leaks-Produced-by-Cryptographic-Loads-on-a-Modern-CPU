@@ -1,0 +1,3 @@
+scenario=ed25519
+duration_s=60
+cpu_csv=/var/log/cpu_freq/cpu_freq_20260317_211332.csv

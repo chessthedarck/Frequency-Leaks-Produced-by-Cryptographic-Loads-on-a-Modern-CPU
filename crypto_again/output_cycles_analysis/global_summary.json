@@ -1,0 +1,162 @@
+{
+  "phase_summary": [
+    {
+      "algo": "aes",
+      "phase": "aes",
+      "n_rows": 10620,
+      "n_runs": 2,
+      "n_cycles": 2,
+      "n_cores": 12,
+      "freq_mean_mhz": 1935.4224407721279,
+      "freq_std_mhz": 1464.807161629923,
+      "freq_min_mhz": 312.725,
+      "freq_max_mhz": 4620.353,
+      "freq_median_mhz": 1468.8609999999999,
+      "duration_mean_s": 60.6255,
+      "duration_std_s": 0.06576093065034387
+    },
+    {
+      "algo": "aes",
+      "phase": "baseline",
+      "n_rows": 10728,
+      "n_runs": 2,
+      "n_cycles": 2,
+      "n_cores": 12,
+      "freq_mean_mhz": 1640.0215508016406,
+      "freq_std_mhz": 1409.0437964683917,
+      "freq_min_mhz": 394.124,
+      "freq_max_mhz": 4622.66,
+      "freq_median_mhz": 715.733,
+      "duration_mean_s": 60.9075,
+      "duration_std_s": 0.04030508652763474
+    },
+    {
+      "algo": "ed25519",
+      "phase": "baseline",
+      "n_rows": 10752,
+      "n_runs": 2,
+      "n_cycles": 2,
+      "n_cores": 12,
+      "freq_mean_mhz": 1618.2087445126488,
+      "freq_std_mhz": 1404.6443523795615,
+      "freq_min_mhz": 394.626,
+      "freq_max_mhz": 4619.658,
+      "freq_median_mhz": 626.37,
+      "duration_mean_s": 60.911500000000004,
+      "duration_std_s": 0.004949747468301833
+    },
+    {
+      "algo": "ed25519",
+      "phase": "ed25519",
+      "n_rows": 10644,
+      "n_runs": 2,
+      "n_cycles": 2,
+      "n_cores": 12,
+      "freq_mean_mhz": 1938.981283446073,
+      "freq_std_mhz": 1475.7067890861633,
+      "freq_min_mhz": 390.253,
+      "freq_max_mhz": 4621.395,
+      "freq_median_mhz": 1478.4495,
+      "duration_mean_s": 60.705,
+      "duration_std_s": 0.11879393923934198
+    },
+    {
+      "algo": "rsa",
+      "phase": "baseline",
+      "n_rows": 10764,
+      "n_runs": 2,
+      "n_cycles": 2,
+      "n_cores": 12,
+      "freq_mean_mhz": 1697.6724319955406,
+      "freq_std_mhz": 1434.2316716023747,
+      "freq_min_mhz": 390.708,
+      "freq_max_mhz": 4619.246,
+      "freq_median_mhz": 800.364,
+      "duration_mean_s": 60.907,
+      "duration_std_s": 0.014142135623735673
+    },
+    {
+      "algo": "rsa",
+      "phase": "rsa",
+      "n_rows": 10601,
+      "n_runs": 2,
+      "n_cycles": 2,
+      "n_cores": 12,
+      "freq_mean_mhz": 1914.6154984435432,
+      "freq_std_mhz": 1486.0172164174712,
+      "freq_min_mhz": 394.2,
+      "freq_max_mhz": 4610.697,
+      "freq_median_mhz": 1270.344,
+      "duration_mean_s": 60.718,
+      "duration_std_s": 0.1315218613006953
+    },
+    {
+      "algo": "sha256",
+      "phase": "baseline",
+      "n_rows": 10752,
+      "n_runs": 2,
+      "n_cycles": 2,
+      "n_cores": 12,
+      "freq_mean_mhz": 1620.7463248697916,
+      "freq_std_mhz": 1409.9615618496646,
+      "freq_min_mhz": 393.663,
+      "freq_max_mhz": 4600.0,
+      "freq_median_mhz": 544.602,
+      "duration_mean_s": 60.905,
+      "duration_std_s": 0.019798989873219895
+    },
+    {
+      "algo": "sha256",
+      "phase": "sha256",
+      "n_rows": 10668,
+      "n_runs": 2,
+      "n_cycles": 2,
+      "n_cores": 12,
+      "freq_mean_mhz": 1967.5385803337083,
+      "freq_std_mhz": 1467.8812014447608,
+      "freq_min_mhz": 394.175,
+      "freq_max_mhz": 4625.698,
+      "freq_median_mhz": 1636.3780000000002,
+      "duration_mean_s": 60.696,
+      "duration_std_s": 0.029698484809836122
+    }
+  ],
+  "diff_summary": [
+    {
+      "algo": "aes",
+      "baseline_mean_mhz": 1640.0215508016406,
+      "crypto_mean_mhz": 1935.4224407721279,
+      "delta_mean_mhz": 295.40088997048724,
+      "timeseries_diff_mean_mhz": 304.31486786372005,
+      "timeseries_diff_max_mhz": 1298.810875,
+      "timeseries_diff_min_mhz": -932.0775000000001
+    },
+    {
+      "algo": "ed25519",
+      "baseline_mean_mhz": 1618.2087445126488,
+      "crypto_mean_mhz": 1938.981283446073,
+      "delta_mean_mhz": 320.77253893342413,
+      "timeseries_diff_mean_mhz": 314.0981021784233,
+      "timeseries_diff_max_mhz": 1560.8940833333334,
+      "timeseries_diff_min_mhz": -711.5814166666667
+    },
+    {
+      "algo": "rsa",
+      "baseline_mean_mhz": 1697.6724319955406,
+      "crypto_mean_mhz": 1914.6154984435432,
+      "delta_mean_mhz": 216.94306644800258,
+      "timeseries_diff_mean_mhz": 223.69111968130014,
+      "timeseries_diff_max_mhz": 2174.80225,
+      "timeseries_diff_min_mhz": -891.0297083333332
+    },
+    {
+      "algo": "sha256",
+      "baseline_mean_mhz": 1620.7463248697916,
+      "crypto_mean_mhz": 1967.5385803337083,
+      "delta_mean_mhz": 346.7922554639167,
+      "timeseries_diff_mean_mhz": 350.5796896123261,
+      "timeseries_diff_max_mhz": 1681.8654999999994,
+      "timeseries_diff_min_mhz": -788.9344583333336
+    }
+  ]
+}

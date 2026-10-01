@@ -1,0 +1,41 @@
+=================================================================
+RAPPORT — Analyse des Templates ECDSA (256 classes, sans HW)
+=================================================================
+
+  Traces totales      : 51,200
+  Classes (byte)      : 256
+  Traces/classe (moy) : 200
+  Durée min moyenne   : 7899.0 µs  (byte=0x00)
+  Durée max moyenne   : 11077.7 µs  (byte=0x21)
+  Amplitude totale    : 3178.7 µs
+  σ moyen intra-classe: 457.2 µs
+
+─────────────────────────────────────────────────────────────────
+SÉPARABILITÉ
+─────────────────────────────────────────────────────────────────
+  Critère de Fisher F : 196.440771
+  Baseline aléatoire  : 0.39 %
+
+  Précision top-K (classifieur centroïde) :
+    top-1   :   1.3 %
+    top-3   :   4.0 %
+    top-5   :   5.9 %
+    top-10  :  11.2 %
+    top-20  :  21.2 %
+    top-50  :  41.8 %
+
+─────────────────────────────────────────────────────────────────
+INTERPRÉTATION
+─────────────────────────────────────────────────────────────────
+  ✓ F > 1 : les 256 classes sont séparables en moyenne.
+
+  ⚠ Top-1 = 1.3 % ≈ hasard (0.39 %) :
+    → Le timing seul ne suffit PAS pour identifier la valeur d'octet directement.
+    → Nécessité de features plus riches : CPU freq dans le temps, spectrogramme, audio.
+
+─────────────────────────────────────────────────────────────────
+PROCHAINE ÉTAPE
+─────────────────────────────────────────────────────────────────
+  → python3 template_explainability.py --indir results/templates
+  → Collecter des features spectrales (CPU freq, audio) pour améliorer la séparabilité
+

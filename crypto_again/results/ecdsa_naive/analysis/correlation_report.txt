@@ -1,0 +1,29 @@
+============================================================
+RAPPORT — Fuite timing ECDSA naïf vs protégé
+============================================================
+
+[ Mode NAÏF ]
+  N signatures       : 500
+  Durée moyenne      : 8075.4 µs
+  Durée std          : 340.0 µs
+  Durée min / max    : 6948 / 9455 µs
+  Pearson r          : 0.537763
+  p-value Pearson    : 8.08e-39  ** FUITE **
+  Mann-Whitney U     : 15251  (p=1.35e-22)  ** FUITE **
+
+[ Mode PROTÉGÉ ]
+  N signatures       : 500
+  Durée moyenne      : 10938.1 µs
+  Durée std          : 220.5 µs
+  Durée min / max    : 10294 / 11692 µs
+  Pearson r          : -0.013574
+  p-value Pearson    : 7.62e-01  (non significatif)
+  Mann-Whitney U     : 29294  (p=2.87e-01)  (non significatif)
+
+============================================================
+INTERPRÉTATION
+============================================================
+Naïf    : corrélation SIGNIFICATIVE → fuite du poids de Hamming(k).
+          Un attaquant observant le timing peut estimer combien de bits
+          à 1 se trouvent dans le nonce k, facilitant une lattice attack.
+Protégé : corrélation NON significative → timing constant, pas de fuite.

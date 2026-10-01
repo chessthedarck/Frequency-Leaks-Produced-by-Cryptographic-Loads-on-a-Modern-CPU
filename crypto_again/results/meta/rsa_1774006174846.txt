@@ -1,0 +1,4 @@
+scenario=rsa
+activity=cryptographic
+duration_s=120
+cpu_csv=/var/log/cpu_freq/cpu_freq_1774006174992.csv

@@ -1,0 +1,3 @@
+scenario=aes
+duration_s=60
+cpu_csv=/var/log/cpu_freq/cpu_freq_20260317_211445.csv

@@ -1,0 +1,4 @@
+scenario=aes
+activity=cryptographic
+duration_s=60
+cpu_csv=/var/log/cpu_freq/cpu_freq_1774014494256.csv

@@ -1,0 +1,62 @@
+=================================================================
+RAPPORT — Comparaison ECDSA naïf / protégé / OpenSSL
+=================================================================
+
+[ Python naïf (double-and-add) ]
+  N mesures            : 500
+  Durée moyenne        : 8075.4 µs
+  Durée std            : 340.0 µs
+  CV (std/mean)        : 4.21 %
+  Pearson r (Hamming)  : 0.5378  (p=8.08e-39)
+  Verdict              : ** VULNÉRABLE **
+
+[ Python protégé (double-and-add-always) ]
+  N mesures            : 500
+  Durée moyenne        : 10938.1 µs
+  Durée std            : 220.5 µs
+  CV (std/mean)        : 2.02 %
+  Pearson r (Hamming)  : -0.0136  (p=7.62e-01)
+  Verdict              : résistant
+
+[ OpenSSL ECDSA (C, scalar blinding) ]
+  N mesures            : 9408
+  Durée moyenne        : 4548.2 µs
+  Durée std            : 440.0 µs
+  CV (std/mean)        : 9.67 %
+  Pearson r (Hamming)  : n/a (k non connu)
+  Verdict              : n/a
+
+[ OpenSSL Ed25519 (C, constant-time) ]
+  N mesures            : 34552
+  Durée moyenne        : 4055.7 µs
+  Durée std            : 478.9 µs
+  CV (std/mean)        : 11.81 %
+  Pearson r (Hamming)  : n/a (k non connu)
+  Verdict              : n/a
+
+[ OpenSSL RSA-2048 (C, référence) ]
+  N mesures            : 65459
+  Durée moyenne        : 5587.2 µs
+  Durée std            : 795.0 µs
+  CV (std/mean)        : 14.23 %
+  Pearson r (Hamming)  : n/a (k non connu)
+  Verdict              : n/a
+
+=================================================================
+INTERPRÉTATION SCIENTIFIQUE
+=================================================================
+
+1. L'implémentation naïve (double-and-add) révèle une corrélation
+   forte entre le poids de Hamming du nonce k et la durée de signature.
+   → Chaque bit supplémentaire à 1 dans k ajoute une opération 'add'.
+   → Un attaquant mesurant suffisamment de signatures peut estimer
+     le poids de Hamming de k, puis mener une lattice attack pour
+     retrouver la clé privée (Nguyen & Shparlinski, 2002).
+
+2. L'implémentation protégée (double-and-add-always) supprime
+   cette corrélation. Le coût : +~34% de temps, mais timing constant.
+
+3. OpenSSL utilise le scalar blinding (k → k + r·n, r aléatoire)
+   en plus d'une multiplication scalaire constant-time.
+   → La corrélation avec le vrai k est impossible à mesurer.
+   → Le CV observé reflète uniquement le bruit système (OS, cache).

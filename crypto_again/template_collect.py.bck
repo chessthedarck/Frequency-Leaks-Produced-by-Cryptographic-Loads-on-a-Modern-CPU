@@ -1,0 +1,255 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import csv
+import secrets
+import time
+from pathlib import Path
+
+#Parametres courbe P-256
+P  = 0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF
+A  = 0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFC
+GX = 0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296
+GY = 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5
+N  = 0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551
+G  = (GX, GY)
+INF = None
+
+
+# Arithmetique courbe eliptique
+
+def modinv(a: int, m: int) -> int:
+    if a == 0:
+        raise ZeroDivisionError
+    lm, hm = 1, 0
+    low, high = a % m, m
+    while low > 1:
+        r = high // low
+        lm, hm = hm - lm * r, lm
+        low, high = high - low * r, low
+    return lm % m
+
+
+def point_add(P1, P2):
+    if P1 is INF:
+        return P2
+    if P2 is INF:
+        return P1
+    x1, y1 = P1
+    x2, y2 = P2
+    if x1 == x2:
+        return INF if y1 != y2 else point_double(P1)
+    lam = ((y2 - y1) * modinv(x2 - x1, P)) % P
+    x3 = (lam * lam - x1 - x2) % P
+    return (x3, (lam * (x1 - x3) - y1) % P)
+
+
+def point_double(Pt):
+    if Pt is INF:
+        return INF
+    x, y = Pt
+    if y == 0:
+        return INF
+    lam = ((3 * x * x + A) * modinv(2 * y, P)) % P
+    x3 = (lam * lam - 2 * x) % P
+    return (x3, (lam * (x - x3) - y) % P)
+
+
+def scalar_mult_naive(k: int):
+    """Double-and-add : timing dépend du poids de Hamming de k."""
+    R = INF
+    for i in range(k.bit_length() - 1, -1, -1):
+        R = point_double(R)
+        if (k >> i) & 1:
+            R = point_add(R, G)
+    return R
+
+
+def scalar_mult_protected(k: int):
+    """Double-and-add-always : timing constant."""
+    R = INF
+    for i in range(k.bit_length() - 1, -1, -1):
+        R = point_double(R)
+        candidate = point_add(R, G)
+        if (k >> i) & 1:
+            R = candidate
+    return R
+
+
+# Controle
+
+def generate_k_with_byte(byte_value: int, byte_index: int) -> int:
+    """
+    Génère un nonce k valide (1 ≤ k < N) dont l'octet `byte_index`
+    (big-endian sur 32 octets : 0 = MSB, 31 = LSB) vaut `byte_value`.
+    Les autres octets sont aléatoires.
+    """
+    while True:
+        k_bytes = bytearray(secrets.token_bytes(32))
+        k_bytes[byte_index] = byte_value
+        k = int.from_bytes(k_bytes, "big")
+        if 1 <= k < N:
+            return k
+
+
+def hamming_weight(n: int) -> int:
+    return bin(n).count("1")
+
+
+# Vitesse de la multiplication scalaire
+
+def estimate_speed(mult_fn) -> float:
+    """Retourne le temps moyen par multiplication scalaire (en secondes)."""
+    print("[*] Calibration (5 itérations)...", end=" ", flush=True)
+    k_test = secrets.randbelow(N - 1) + 1
+    t0 = time.perf_counter()
+    for _ in range(5):
+        mult_fn(k_test)
+    avg = (time.perf_counter() - t0) / 5
+    print(f"{avg * 1000:.0f} ms/op")
+    return avg
+
+
+#Collecte templates
+
+def collect(
+    target_byte_idx: int,
+    n_traces: int,
+    mode: str,
+    byte_values: list[int],
+    outdir: Path,
+    speed_s: float,
+) -> None:
+    mult = scalar_mult_naive if mode == "naive" else scalar_mult_protected
+
+    by_value_dir = outdir / "by_value"
+    by_value_dir.mkdir(parents=True, exist_ok=True)
+
+    timestamp = int(time.time() * 1000)
+    master_path = outdir / f"templates_byte{target_byte_idx}_{timestamp}.csv"
+
+    header = ["byte_value", "iter", "hamming_weight_k", "n_bits_k", "duration_ns"]
+
+    total = len(byte_values) * n_traces
+    done = 0
+    t0_global = time.time()
+
+    with master_path.open("w", newline="") as master_f:
+        master_w = csv.writer(master_f)
+        master_w.writerow(header)
+
+        for bv in byte_values:
+            per_path = by_value_dir / f"val_{bv:03d}_0x{bv:02X}.csv"
+
+            with per_path.open("w", newline="") as pf:
+                per_w = csv.writer(pf)
+                per_w.writerow(header)
+
+                for it in range(1, n_traces + 1):
+                    k = generate_k_with_byte(bv, target_byte_idx)
+
+                    t_start = time.perf_counter_ns()
+                    mult(k)
+                    t_end = time.perf_counter_ns()
+
+                    row = [bv, it, hamming_weight(k), k.bit_length(), t_end - t_start]
+                    per_w.writerow(row)
+                    master_w.writerow(row)
+
+                    done += 1
+                    if done % 200 == 0 or (done == total):
+                        elapsed = time.time() - t0_global
+                        remaining = total - done
+                        eta_s = (elapsed / done) * remaining if done > 0 else speed_s * remaining
+                        pct = done / total * 100
+                        print(
+                            f"  [{done:>6}/{total}]  val=0x{bv:02X}  iter={it:>4}  "
+                            f"{pct:5.1f}%  ETA: {eta_s/60:.1f} min",
+                            flush=True,
+                        )
+
+            print(f"  [val=0x{bv:02X}] → {per_path.name}")
+
+    total_time = time.time() - t0_global
+    print()
+    print(f"[OK] Temps total   : {total_time/60:.1f} min")
+    print(f"[OK] Traces totales: {done}")
+    print(f"[OK] Consolidé     : {master_path}")
+    print(f"[OK] Par valeur    : {by_value_dir}/")
+
+
+# MAIN
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Template Attack — collecte de traces pour le profilage (Device A)",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument(
+        "--target-byte", type=int, default=0,
+        help="Index de l'octet cible dans k (big-endian 32 octets : 0=MSB, 31=LSB)",
+    )
+    parser.add_argument(
+        "--traces", type=int, default=200,
+        help="Nombre de traces par valeur d'octet",
+    )
+    parser.add_argument(
+        "--mode", choices=["naive", "protected"], default="naive",
+        help="Implémentation de la multiplication scalaire",
+    )
+    parser.add_argument(
+        "--byte-range", nargs=2, type=int, default=[0, 255],
+        metavar=("MIN", "MAX"),
+        help="Plage de valeurs d'octet à couvrir (ex: 0 15 pour tester un sous-ensemble)",
+    )
+    parser.add_argument(
+        "--outdir", default="results/templates",
+        help="Répertoire de sortie",
+    )
+    args = parser.parse_args()
+
+    if not (0 <= args.target_byte <= 31):
+        raise SystemExit("--target-byte doit être entre 0 et 31")
+    if not (0 <= args.byte_range[0] <= args.byte_range[1] <= 255):
+        raise SystemExit("--byte-range invalide")
+
+    byte_values = list(range(args.byte_range[0], args.byte_range[1] + 1))
+    n_classes = len(byte_values)
+    n_total = n_classes * args.traces
+
+    mult_fn = scalar_mult_naive if args.mode == "naive" else scalar_mult_protected
+    speed_s = estimate_speed(mult_fn)
+
+    est_total_min = speed_s * n_total / 60
+    print()
+    print(f"[*] Octet cible    : byte[{args.target_byte}] (big-endian, 0=MSB, 31=LSB)")
+    print(f"[*] Valeurs        : 0x{args.byte_range[0]:02X} → 0x{args.byte_range[1]:02X}  ({n_classes} classes)")
+    print(f"[*] Traces/classe  : {args.traces}")
+    print(f"[*] Total          : {n_total:,} multiplications scalaires")
+    print(f"[*] Mode           : {args.mode}")
+    print(f"[*] Durée estimée  : {est_total_min:.0f} min  ({est_total_min/60:.1f} h)")
+    print()
+
+    if est_total_min > 30:
+        print(
+            f"[!] ATTENTION : {est_total_min:.0f} min sur cette machine.\n"
+            "    Pour un test rapide : --byte-range 0 15 --traces 50\n"
+            "    Pour le Raspberry Pi, prévoir plusieurs heures.\n"
+        )
+
+    outdir = Path(args.outdir)
+    outdir.mkdir(parents=True, exist_ok=True)
+
+    collect(
+        target_byte_idx=args.target_byte,
+        n_traces=args.traces,
+        mode=args.mode,
+        byte_values=byte_values,
+        outdir=outdir,
+        speed_s=speed_s,
+    )
+
+
+if __name__ == "__main__":
+    main()

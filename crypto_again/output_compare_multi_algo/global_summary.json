@@ -1,0 +1,79 @@
+{
+  "cpu_global": {
+    "baseline": {
+      "n_rows": 5268,
+      "n_cores": 12,
+      "duration_s": 60.983999999999995,
+      "freq_mean_mhz": 1680.150353834472,
+      "freq_std_mhz": 1395.269910802381,
+      "freq_min_mhz": 363.041,
+      "freq_max_mhz": 4631.292
+    },
+    "rsa": {
+      "n_rows": 5310,
+      "n_cores": 12,
+      "duration_s": 60.935,
+      "freq_mean_mhz": 1940.9447150659132,
+      "freq_std_mhz": 1486.597838155027,
+      "freq_min_mhz": 394.778,
+      "freq_max_mhz": 4621.296
+    },
+    "ed25519": {
+      "n_rows": 5268,
+      "n_cores": 12,
+      "duration_s": 60.26,
+      "freq_mean_mhz": 1965.007492976462,
+      "freq_std_mhz": 1478.1890841455324,
+      "freq_min_mhz": 382.372,
+      "freq_max_mhz": 4606.705
+    },
+    "aes": {
+      "n_rows": 5280,
+      "n_cores": 12,
+      "duration_s": 60.237,
+      "freq_mean_mhz": 1940.3517130681819,
+      "freq_std_mhz": 1475.0264937885088,
+      "freq_min_mhz": 394.75,
+      "freq_max_mhz": 4609.523
+    },
+    "sha256": {
+      "n_rows": 5316,
+      "n_cores": 12,
+      "duration_s": 60.594,
+      "freq_mean_mhz": 1969.3265583145223,
+      "freq_std_mhz": 1472.5367303723297,
+      "freq_min_mhz": 394.603,
+      "freq_max_mhz": 4609.228
+    }
+  },
+  "iter_global": {
+    "rsa": {
+      "n_iters": 8205,
+      "mean_duration_us": 5580.841194393663,
+      "std_duration_us": 780.9196777895809,
+      "min_duration_us": 4133.0,
+      "max_duration_us": 8616.0
+    },
+    "ed25519": {
+      "n_iters": 10319,
+      "mean_duration_us": 4040.848919468941,
+      "std_duration_us": 403.04356018165225,
+      "min_duration_us": 2929.0,
+      "max_duration_us": 18178.0
+    },
+    "aes": {
+      "n_iters": 10907,
+      "mean_duration_us": 3734.2998074630973,
+      "std_duration_us": 364.7572600502441,
+      "min_duration_us": 2658.0,
+      "max_duration_us": 7090.0
+    },
+    "sha256": {
+      "n_iters": 11977,
+      "mean_duration_us": 3292.82733572681,
+      "std_duration_us": 299.75655131729627,
+      "min_duration_us": 2307.0,
+      "max_duration_us": 4539.0
+    }
+  }
+}
